@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block 'title' %}Cadastro - Healing{% endblock 'title' %}
+
 {% block 'head' %}
     <link rel="stylesheet" href="{% static 'usuarios/css/usuarios.css' %}">
 {% endblock 'head' %}
@@ -19,7 +21,15 @@
                     </section>
                     <hr>
                     
-                    <form action="" method="post">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert {{message.tags}}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}    
+                    {% endif %}
+
+                    <form action="{% url "cadastro" %}" method="post"> {% csrf_token %}
                         <h2 class="fonte-destaque1">Cadastre-se</h2>
                         <br>
                         <label for="">Username</label>
