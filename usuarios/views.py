@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.messages import constants
 from django.urls import reverse
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 # from django.http import HttpResponse
 
 def cadastro(request):
@@ -57,7 +57,13 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
-            return redirect(reverse('index')) # TODO /pacientes/home
+            # TODO /pacientes/home
+            # return redirect(reverse('home')) 
+            return redirect(reverse('login'))
         
         messages.add_message(request, constants.ERROR, 'Usuário ou senha inválidos')
         return redirect(reverse('login'))
+
+def logout_view(request):
+    logout(request)
+    return redirect(reverse('login'))
