@@ -92,7 +92,7 @@ def abrir_horario(request):
 
     if request.method == "GET":
         dados_medicos = DadosMedico.objects.get(user=request.user)
-        datas_abertas = DatasAbertas.objects.filter(user=request.user)
+        datas_abertas = DatasAbertas.objects.filter(user=request.user).order_by("data")
         return render(
             request,
             "abrir_horario.html",

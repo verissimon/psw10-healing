@@ -40,8 +40,8 @@
             <div class="col-md-4">
                 <p style="font-size: 25px" class="p-bold">Seus horários:</p>
                 <ul class="list-group">
-                    {% for data in datas_abertas %}
-                        <li>{{data}}</li>
+                    {% for dt in datas_abertas %}
+                        <li>{{dt.data|date:"j \d\e F, Y. H:i"}}</li>
                     {% endfor %}
                 </ul>
             </div>
