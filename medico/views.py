@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
-from .models import Especialidades, DadosMedico
+from .models import Especialidades, DadosMedico, DatasAbertas
 from django.contrib import messages
 from django.contrib.messages import constants
 from django.urls import reverse
+from datetime import datetime
 import re
 
 
@@ -13,13 +14,11 @@ def is_medico(user):
 # Create your views here.
 def cadastro_medico(request):
 
-    if not request.user.is_authenticated:
+    if is_medico(request.user):
         messages.add_message(
-            request,
-            constants.WARNING,
-            "Você precisa estar logado para acessar essa página.",
+            request, constants.WARNING, "Você já está cadastrado como médico."
         )
-        return redirect(reverse("login"))
+        return redirect(reverse("abrir_horario"))
 
     if request.method == "GET":
         especialidades = Especialidades.objects.all()
@@ -28,14 +27,6 @@ def cadastro_medico(request):
         )
 
     if request.method == "POST":
-        if is_medico(request.user):
-            messages.add_message(
-                request, constants.WARNING, "Você já está cadastrado como médico."
-            )
-            return redirect(
-                "/medicos/abrir_horario"
-            )  # TODO redirect(reverse("abrir_horario"))
-
         try:
             crm = request.POST["crm"]
             nome = request.POST["nome"]
@@ -83,11 +74,45 @@ def cadastro_medico(request):
                 request, constants.SUCCESS, "Cadastro médico realizado com sucesso."
             )
 
-            return render(
-                request, "cadastro_medico.html"
-            )  # TODO redirect(reverse("abrir_horario")
+            return redirect(reverse("abrir_horario"))
         except Exception as e:
             messages.add_message(
                 request, constants.ERROR, f"Erro ao cadastrar médico. {e}"
             )
             return redirect(reverse("cadastro_medico"))
+
+
+def abrir_horario(request):
+
+    if not is_medico(request.user):
+        messages.add_message(
+            request, constants.WARNING, "Você não é um médico cadastrado."
+        )
+        return redirect(reverse("cadastro_medico"))
+
+    if request.method == "GET":
+        dados_medicos = DadosMedico.objects.get(user=request.user)
+        datas_abertas = DatasAbertas.objects.filter(user=request.user)
+        return render(
+            request,
+            "abrir_horario.html",
+            {"dados_medicos": dados_medicos, "datas_abertas": datas_abertas},
+        )
+
+    if request.method == "POST":
+        data = request.POST.get("data")
+        data_formatada = datetime.strptime(data, "%Y-%m-%dT%H:%M")
+
+        if data_formatada <= datetime.now():
+            messages.add_message(
+                request, constants.WARNING, "Data inválida. Deve ser uma data futura."
+            )
+            return redirect(reverse("abrir_horario"))
+
+        horario_abrir = DatasAbertas(data=data, user=request.user)
+        horario_abrir.save()
+
+        messages.add_message(
+            request, constants.SUCCESS, "Horário cadastrado com sucesso."
+        )
+        return redirect(reverse("abrir_horario"))

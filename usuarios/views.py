@@ -59,7 +59,7 @@ def login_view(request):
             login(request, user)
             # TODO /pacientes/home
             # return redirect(reverse('home')) 
-            return redirect(reverse('login'))
+            return redirect(reverse('cadastro_medico'))
         
         messages.add_message(request, constants.ERROR, 'Usuário ou senha inválidos')
         return redirect(reverse('login'))
