@@ -20,3 +20,18 @@ def home(request):
             request, "home.html", {"medicos": medicos, "especialidades": especialidades}
         )
 
+
+def escolher_horario(request, id_dados_medicos):
+    if request.method == "GET":
+        medico = DadosMedico.objects.get(id=id_dados_medicos)
+        datas_abertas = (
+            DatasAbertas.objects.filter(user=medico.user)
+            .filter(data__gte=datetime.now())
+            .filter(agendado=False)
+            .order_by("data")
+        )
+        return render(
+            request,
+            "escolher_horario.html",
+            {"medico": medico, "datas_abertas": datas_abertas},
+        )

@@ -48,12 +48,12 @@
                     <p><i class="bi bi-map icon-main"></i>&nbsp&nbsp{{med.rua}}, {{med.numero}}.</p>
                     <p><i class="bi bi-calendar2-week icon-main"></i>&nbsp&nbspProxima data: 
                         {% if med.proxima_data %}
-                            {{med.proxima_data.data|date:"j \d\e F, H:i. Y"}}
+                            {{med.proxima_data.data}}
                         {% else %}
                             Indisponível.
                         {% endif %}
                     <br><br>
-                    <a href="#" class="btn btn-success btn-dark-color">Agendar</a>
+                    <a href="{% url "escolher_horario" med.id %}" class="btn btn-success btn-dark-color">Agendar</a>
                 </div>
                 <br>
                 {% endfor %}
