@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from medico.models import DadosMedico, DatasAbertas
+from datetime import datetime
 
 
 # Create your models here.
@@ -21,6 +22,10 @@ class Consulta(models.Model):
     @property
     def medico(self):
         return DadosMedico.objects.get(user=self.data_aberta.user)
+    
+    @property
+    def days_left(self):
+        return (self.data_aberta.data - datetime.now()).days
     
     def __str__(self):
         return self.paciente.username

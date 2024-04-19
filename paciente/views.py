@@ -14,7 +14,8 @@ def home(request):
         especialidades = Especialidades.objects.all()
         medico_filtro = request.GET.get("medico")
         especs_filtro = request.GET.getlist("especialidades")
-        # TODO Lembrete
+        consultas = Consulta.objects.filter(paciente=request.user)
+        print(consultas)
 
         if medico_filtro:
             medicos = medicos.filter(nome__icontains=medico_filtro)
@@ -23,7 +24,13 @@ def home(request):
             medicos = medicos.filter(especialidade_id__in=especs_filtro)
 
         return render(
-            request, "home.html", {"medicos": medicos, "especialidades": especialidades}
+            request,
+            "home.html",
+            {
+                "medicos": medicos,
+                "especialidades": especialidades,
+                "consultas": consultas,
+            },
         )
 
 

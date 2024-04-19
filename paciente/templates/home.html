@@ -59,12 +59,17 @@
                 {% endfor %}
             </div>
         </div>
-        <div class="col-md-4">
-            <p style="font-size: 25px" class="p-bold">Lembretes</p>
-            <p class="bg-main-lembrete">
-                <span class="p-bold"><i class="bi bi-exclamation-triangle-fill icon-differential"></i>&nbsp&nbsp Consulta com 'medico' em data_consulta-hoje dias.</span>
-            </p>
-        </div>
+        {% if consultas %}
+            <div class="col-md-4">
+                <p style="font-size: 25px" class="p-bold">Lembretes</p>
+                {% for consulta in consultas %}
+                <p class="bg-main-lembrete">
+                    <span class="p-bold">
+                        <i class="bi bi-exclamation-triangle-fill icon-differential"></i>&nbsp&nbsp Consulta com {{consulta.medico.nome}} em {{consulta.days_left}} dias.</span>
+                </p>
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
 </div>
 
