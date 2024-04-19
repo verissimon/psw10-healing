@@ -1,6 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from medico.models import DadosMedico, DatasAbertas, Especialidades
+from django.db import transaction
+from paciente.models import Consulta
 from datetime import datetime
+from django.contrib import messages
+from django.contrib.messages import constants
+
 
 def home(request):
     if request.method == "GET":
@@ -34,4 +40,50 @@ def escolher_horario(request, id_dados_medicos):
             request,
             "escolher_horario.html",
             {"medico": medico, "datas_abertas": datas_abertas},
+        )
+
+
+def agendar_horario(request, id_data_aberta):
+    if request.method == "GET":  # agenda horario de consulta e atualiza data_aberta
+        with transaction.atomic():
+            data_aberta = DatasAbertas.objects.get(id=id_data_aberta)
+            horario_agendado = Consulta(paciente=request.user, data_aberta=data_aberta)
+            horario_agendado.save()
+            data_aberta.agendado = True
+            data_aberta.save()
+
+        messages.add_message(
+            request, constants.SUCCESS, "Consulta agendada com sucesso!"
+        )
+
+        return redirect(reverse("minhas_consultas"))
+
+
+def minhas_consultas(request):
+    if request.method == "GET":
+        minhas_consultas = Consulta.objects.filter(paciente=request.user).filter(
+            data_aberta__data__gte=datetime.now()
+        )
+        data_filtro = request.GET.get("data")
+        especs_filtro = request.GET.get("especialidades")
+
+        if data_filtro:
+            minhas_consultas = minhas_consultas.filter(
+                data_aberta__data__date=data_filtro
+            )
+
+        if especs_filtro:
+            medicos_agendados = DadosMedico.objects.filter(
+                especialidade__especialidade__icontains=especs_filtro
+            )
+            minhas_consultas = minhas_consultas.filter(
+                data_aberta__user_id__in=medicos_agendados.values_list(
+                    "user_id", flat=True
+                )
+            )
+
+        return render(
+            request,
+            "minhas_consultas.html",
+            {"minhas_consultas": minhas_consultas},
         )

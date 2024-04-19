@@ -34,8 +34,7 @@
                 <div class="row">
                     {% for dt in datas_abertas %}
                         <div class="col-md-3">
-                            <a class="link" href=""> 
-                                {% comment %} TODO {% endcomment %}
+                            <a class="link" href="{% url "agendar_horario" dt.id %}" onclick="return confirm('Tem certeza que deseja agendar consulta para este horário?')">
                             <div class='selecionar-dia'>
                             <div class="header-dias">
                                 <span class="mes">

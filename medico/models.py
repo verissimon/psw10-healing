@@ -45,7 +45,7 @@ class DadosMedico(models.Model):
 
 
 class DatasAbertas(models.Model):
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING) # user medico
     data = models.DateTimeField()
     agendado = models.BooleanField(default=False)
     
