@@ -6,6 +6,7 @@ from paciente.models import Consulta
 from datetime import datetime
 from django.contrib import messages
 from django.contrib.messages import constants
+from medico.views import is_medico
 
 
 def home(request):
@@ -14,8 +15,10 @@ def home(request):
         especialidades = Especialidades.objects.all()
         medico_filtro = request.GET.get("medico")
         especs_filtro = request.GET.getlist("especialidades")
-        consultas = Consulta.objects.filter(paciente=request.user)
-        print(consultas)
+        consultas = Consulta.objects.filter(
+            paciente=request.user, data_aberta__data__gte=datetime.now()
+        )
+        # print(consultas)
 
         if medico_filtro:
             medicos = medicos.filter(nome__icontains=medico_filtro)
@@ -30,6 +33,7 @@ def home(request):
                 "medicos": medicos,
                 "especialidades": especialidades,
                 "consultas": consultas,
+                "is_medico": is_medico(request.user),
             },
         )
 
@@ -46,7 +50,11 @@ def escolher_horario(request, id_dados_medicos):
         return render(
             request,
             "escolher_horario.html",
-            {"medico": medico, "datas_abertas": datas_abertas},
+            {
+                "medico": medico,
+                "datas_abertas": datas_abertas,
+                "is_medico": is_medico(request.user),
+            },
         )
 
 
@@ -92,5 +100,8 @@ def minhas_consultas(request):
         return render(
             request,
             "minhas_consultas.html",
-            {"minhas_consultas": minhas_consultas},
+            {
+                "minhas_consultas": minhas_consultas,
+                "is_medico": is_medico(request.user),
+            },
         )
