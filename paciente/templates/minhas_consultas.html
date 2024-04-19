@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block 'title' %}Minhas consultas{% endblock 'title' %}Minhas consultas
+{% block 'title' %}Minhas consultas{% endblock 'title' %}
 {% block 'head' %}
     <link rel="stylesheet" href="{% static 'medicos/css/abrir_horario.css' %}">
     <link rel="stylesheet" href="{% static 'usuarios/css/usuarios.css' %}">
@@ -42,7 +42,7 @@
                 <tbody>
                     {% for consulta in minhas_consultas  %}
                         <tr>
-                            <td><a href="{% url "escolher_horario" consulta.data_aberta.user.id %}">Dr(a). {{consulta.medico.nome}}</a></td>
+                            <td><a href="{% url "consulta" consulta.id %}">Dr(a). {{consulta.medico.nome}}</a></td>
                             <td>{{consulta.get_status_display}}</td>
                             <td>{{consulta.data_aberta.data}}</td>
                         </tr>
