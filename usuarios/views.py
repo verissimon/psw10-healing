@@ -57,9 +57,7 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
-            # TODO /pacientes/home
-            # return redirect(reverse('home')) 
-            return redirect(reverse('cadastro_medico'))
+            return redirect(reverse('home'))
         
         messages.add_message(request, constants.ERROR, 'Usuário ou senha inválidos')
         return redirect(reverse('login'))

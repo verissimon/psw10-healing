@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from .models import Especialidades, DadosMedico, DatasAbertas
+from paciente.models import Consulta
 from django.contrib import messages
 from django.contrib.messages import constants
 from django.urls import reverse
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 
 
@@ -116,3 +117,39 @@ def abrir_horario(request):
             request, constants.SUCCESS, "Horário cadastrado com sucesso."
         )
         return redirect(reverse("abrir_horario"))
+
+
+def consultas_medico(request):
+    if not is_medico(request.user):
+        messages.add_message(
+            request, constants.WARNING, "Somente médicos podem acessar essa página."
+        )
+        return redirect(reverse("logout"))
+
+    if request.method == "GET":
+        data_filter = request.GET.get("data")
+        hoje = datetime.now().date()
+        consultas_all = Consulta.objects.filter(data_aberta__user=request.user)
+        
+        if data_filter:
+            data_filter = datetime.strptime(data_filter, "%Y-%m-%d")
+            consultas_all = consultas_all.filter(data_aberta__data__date=data_filter)
+            print(consultas_all.values("id"))
+        
+        consultas_hoje = (
+            consultas_all
+            .filter(data_aberta__data__gte=hoje)
+            .filter(data_aberta__data__lt=hoje + timedelta(days=1))
+        )
+
+        consultas_restantes = consultas_all.exclude(id__in=consultas_hoje.values("id"))
+        
+        return render(
+            request,
+            "consultas_medico.html",
+            {
+                "consultas_hoje": consultas_hoje,
+                "consultas_restantes": consultas_restantes,
+                "is_medico": is_medico(request.user),
+            },
+        )

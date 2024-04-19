@@ -9,7 +9,8 @@ class LoginRequiredMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if not request.user.is_authenticated and "/medicos" in request.path:
+        auth_req_path = "/medicos" in request.path or "/pacientes" in request.path
+        if not request.user.is_authenticated and auth_req_path:
             messages.add_message(
                 request,
                 constants.WARNING,
