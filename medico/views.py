@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import Especialidades, DadosMedico, DatasAbertas
-from paciente.models import Consulta
+from paciente.models import Consulta, Documento
 from django.contrib import messages
 from django.contrib.messages import constants
 from django.urls import reverse
@@ -168,10 +168,15 @@ def consulta_area_medico(request, id_consulta):
 
     if request.method == "GET":
         consulta = Consulta.objects.get(id=id_consulta)
+        documentos = Documento.objects.filter(consulta=consulta)
         return render(
             request,
             "consulta_area_medico.html",
-            {"consulta": consulta, "is_medico": is_medico(request.user)},
+            {
+                "consulta": consulta,
+                "is_medico": is_medico(request.user),
+                "documentos": documentos,
+            },
         )
 
     if request.method == "POST":
@@ -213,7 +218,7 @@ def finalizar_consulta(request, id_consulta):
             request, constants.WARNING, "Somente médicos podem acessar essa página."
         )
         return redirect(reverse("logout"))
-    
+
     consulta = Consulta.objects.get(id=id_consulta)
 
     if consulta.data_aberta.user != request.user:
@@ -223,7 +228,7 @@ def finalizar_consulta(request, id_consulta):
             "Você não tem permissão para alterar status dessa consulta.",
         )
         return redirect(reverse("consultas_medico"))
-    
+
     if consulta.status == "F":
         messages.add_message(
             request,
@@ -231,7 +236,6 @@ def finalizar_consulta(request, id_consulta):
             "Consulta já foi finalizada.",
         )
         return redirect(reverse("consultas_medico"))
-
 
     consulta.status = "F"
     consulta.save()
@@ -241,3 +245,38 @@ def finalizar_consulta(request, id_consulta):
         f"Consulta de {consulta.data_aberta} com paciente {consulta.paciente} finalizada com sucesso.",
     )
     return redirect(reverse("consultas_medico"))
+
+
+def add_documento(request, id_consulta):
+
+    if not is_medico(request.user):
+        messages.add_message(
+            request, constants.WARNING, "Somente médicos podem acessar essa página."
+        )
+        return redirect(reverse("logout"))
+
+    consulta = Consulta.objects.get(id=id_consulta)
+
+    if consulta.data_aberta.user != request.user:
+        messages.add_message(request, constants.ERROR, "Essa consulta não é sua!")
+        return redirect(reverse("consulta_area_medico", args=[consulta.id]))
+
+    titulo = request.POST.get("titulo")
+    documento = request.FILES.get("documento")
+
+    if not documento:
+        messages.add_message(request, constants.WARNING, "Adicione o documento.")
+        return redirect(reverse("consulta_area_medico", args=[consulta.id]))
+
+    if not titulo:
+        messages.add_message(
+            request, constants.WARNING, "Adicione o título do documento."
+        )
+        return redirect(reverse("consulta_area_medico", args=[consulta.id]))
+
+    documento = Documento(consulta=consulta, titulo=titulo, documento=documento)
+
+    documento.save()
+    messages.add_message(request, constants.SUCCESS, "Documento enviado com sucesso!")
+
+    return redirect(reverse("consulta_area_medico", args=[consulta.id]))
