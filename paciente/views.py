@@ -1,8 +1,9 @@
+from xml.dom.minidom import Document
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from medico.models import DadosMedico, DatasAbertas, Especialidades
 from django.db import transaction
-from paciente.models import Consulta
+from paciente.models import Consulta, Documento
 from datetime import datetime
 from django.contrib import messages
 from django.contrib.messages import constants
@@ -112,6 +113,7 @@ def minhas_consultas(request):
 def consulta(request, id_consulta):
     if request.method == "GET":
         consulta = Consulta.objects.get(id=id_consulta)
+        documentos = Documento.objects.filter(consulta=consulta)
         dado_medico = DadosMedico.objects.get(user=consulta.data_aberta.user)
         return render(
             request,
@@ -120,6 +122,7 @@ def consulta(request, id_consulta):
                 "consulta": consulta,
                 "dado_medico": dado_medico,
                 "is_medico": is_medico(request.user),
+                "documentos": documentos,
             },
         )
 

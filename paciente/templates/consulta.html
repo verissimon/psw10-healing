@@ -69,8 +69,11 @@
                 
                 <hr>
                 <h3 class="p-bold">Meus documentos</h3>
-                <br>
-                <br>
+                {% for doc in documentos %}
+                    <a href="{{doc.documento.url}}" class="btn btn-dark-color-outline">
+                     {{doc.titulo}} - {{doc.consulta.data_aberta.data.year}}
+                    </a>
+                {% endfor %}
             </div>
             <div class="col-md"></div>
         </div>
