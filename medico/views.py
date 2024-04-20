@@ -157,3 +157,85 @@ def consultas_medico(request):
                 "is_medico": is_medico(request.user),
             },
         )
+
+
+def consulta_area_medico(request, id_consulta):
+    if not is_medico(request.user):
+        messages.add_message(
+            request, constants.WARNING, "Somente médicos podem acessar essa página."
+        )
+        return redirect(reverse("logout"))
+
+    if request.method == "GET":
+        consulta = Consulta.objects.get(id=id_consulta)
+        return render(
+            request,
+            "consulta_area_medico.html",
+            {"consulta": consulta, "is_medico": is_medico(request.user)},
+        )
+
+    if request.method == "POST":
+        try:
+            consulta = Consulta.objects.get(id=id_consulta)
+            link = request.POST.get("link")
+
+            if not link:
+                raise ValueError("Informe o link da consulta.")
+
+            if consulta.status == "C":
+                messages.add_message(
+                    request, constants.WARNING, "Consulta já foi cancelada."
+                )
+                return redirect(reverse("consulta_area_medico", args=[consulta.id]))
+            elif consulta.status == "F":
+                messages.add_message(
+                    request, constants.WARNING, "Consulta já foi finalizada."
+                )
+                return redirect(reverse("consulta_area_medico", args=[consulta.id]))
+
+            consulta.link = link
+            consulta.status = "I"
+            consulta.save()
+            messages.add_message(
+                request, constants.SUCCESS, "Consulta atualizada com sucesso."
+            )
+            return redirect(reverse("consultas_medico"))
+        except Exception as e:
+            messages.add_message(
+                request, constants.ERROR, f"Erro ao atualizar consulta. {e}"
+            )
+            return redirect(reverse("consulta_area_medico", args=[consulta.id]))
+
+
+def finalizar_consulta(request, id_consulta):
+    if not is_medico(request.user):
+        messages.add_message(
+            request, constants.WARNING, "Somente médicos podem acessar essa página."
+        )
+        return redirect(reverse("logout"))
+    consulta = Consulta.objects.get(id=id_consulta)
+
+    if consulta.data_aberta.user != request.user:
+        messages.add_message(
+            request,
+            constants.WARNING,
+            "Você não tem permissão para finalizar essa consulta.",
+        )
+        return redirect(reverse("consultas_medico"))
+    
+    if consulta.status == "F":
+        messages.add_message(
+            request,
+            constants.WARNING,
+            "Consulta já foi finalizada.",
+        )
+        return redirect(reverse("consulta_area_medico", args=[consulta.id]))
+
+    consulta.status = "F"
+    consulta.save()
+    messages.add_message(
+        request,
+        constants.SUCCESS,
+        f"Consulta de {consulta.data_aberta} com paciente {consulta.paciente} finalizada com sucesso.",
+    )
+    return redirect(reverse("consulta_area_medico", args=[consulta.id]))
