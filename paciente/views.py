@@ -78,7 +78,7 @@ def minhas_consultas(request):
     if request.method == "GET":
         minhas_consultas = Consulta.objects.filter(
             paciente=request.user,
-            #data_aberta__data__gte=datetime.now()
+            # data_aberta__data__gte=datetime.now()
         )
 
         data_filtro = request.GET.get("data")
@@ -122,3 +122,42 @@ def consulta(request, id_consulta):
                 "is_medico": is_medico(request.user),
             },
         )
+
+
+def cancelar_consulta(request, id_consulta):
+    consulta = Consulta.objects.get(id=id_consulta)
+
+    if consulta.paciente != request.user:
+        messages.add_message(
+            request,
+            constants.WARNING,
+            "Você não tem permissão para cancelar essa consulta.",
+        )
+        return redirect(reverse("minhas_consultas"))
+
+    if consulta.status == "F":
+        messages.add_message(
+            request,
+            constants.WARNING,
+            "Você não pode cancelar uma consulta que já foi finalizada.",
+        )
+        return redirect(reverse("minhas_consultas"))
+
+    if consulta.status == "C":
+        consulta.status = "A"
+        consulta.save()
+        messages.add_message(
+            request,
+            constants.SUCCESS,
+            f"Consulta de {consulta.data_aberta} com paciente {consulta.paciente} descancelada com sucesso.",
+        )
+        return redirect(reverse("minhas_consultas"))
+
+    consulta.status = "C"
+    consulta.save()
+    messages.add_message(
+        request,
+        constants.SUCCESS,
+        f"Consulta de {consulta.data_aberta} com Dr(a). {consulta.medico.nome} cancelada com sucesso.",
+    )
+    return redirect(reverse("minhas_consultas"))

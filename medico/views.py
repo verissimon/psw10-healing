@@ -213,13 +213,14 @@ def finalizar_consulta(request, id_consulta):
             request, constants.WARNING, "Somente médicos podem acessar essa página."
         )
         return redirect(reverse("logout"))
+    
     consulta = Consulta.objects.get(id=id_consulta)
 
     if consulta.data_aberta.user != request.user:
         messages.add_message(
             request,
             constants.WARNING,
-            "Você não tem permissão para finalizar essa consulta.",
+            "Você não tem permissão para alterar status dessa consulta.",
         )
         return redirect(reverse("consultas_medico"))
     
@@ -229,7 +230,8 @@ def finalizar_consulta(request, id_consulta):
             constants.WARNING,
             "Consulta já foi finalizada.",
         )
-        return redirect(reverse("consulta_area_medico", args=[consulta.id]))
+        return redirect(reverse("consultas_medico"))
+
 
     consulta.status = "F"
     consulta.save()
@@ -238,4 +240,4 @@ def finalizar_consulta(request, id_consulta):
         constants.SUCCESS,
         f"Consulta de {consulta.data_aberta} com paciente {consulta.paciente} finalizada com sucesso.",
     )
-    return redirect(reverse("consulta_area_medico", args=[consulta.id]))
+    return redirect(reverse("consultas_medico"))

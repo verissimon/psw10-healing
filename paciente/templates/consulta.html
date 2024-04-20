@@ -56,6 +56,8 @@
                 <p style="font-size:20px"><i class="bi bi-calendar3 color-dark"></i>&nbsp {{consulta.data_aberta.data}}</p>
                 <p style="font-size:20px"><i class="bi bi-tag-fill color-dark"></i></i>&nbsp R$ {{dado_medico.valor_consulta}}</p>
                 <a style="cursor: auto;" class="btn btn-dark-color-outline btn-lg">Adicione em seu calendário!</a>
+                <a class="btn btn-dark-color-outline btn-lg" href="{% url 'cancelar_consulta' consulta.id %}">{% if consulta.status == 'C' %}Des{% endif %}Cancelar consulta</a>
+                
                 <hr>
                 <h3 class="p-bold">Como acessar ?</h3>
                 <p>No horário da consulta acesse o link disponível abaixo</p>
@@ -67,9 +69,6 @@
                 
                 <hr>
                 <h3 class="p-bold">Meus documentos</h3>
-                <br>
-                <br>
-                <br>
                 <br>
                 <br>
             </div>

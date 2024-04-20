@@ -12,6 +12,13 @@
 {% include "partials/navbar.html" %}
     <div class="container">
         <br>
+        {% if messages %}
+            {% for message in messages %}
+                <section class="alert {{message.tags}}">
+                    {{message}}
+                </section>
+            {% endfor %}
+        {% endif %}
         <h2><span class="color-dark">Suas consultas</span></h2>
 
         <div class="row">
